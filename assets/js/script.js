@@ -47,7 +47,8 @@ function fillDashboard(day, index, cityName) {
         today.append(`
             <div class="card border-dark p-0">
                 <div class="card-body text-dark">
-                    <h5 class="card-title h3">`+ cityName + ` (` + day.date + `) [weather icon here]</h5>
+                    <h5 class="card-title h3">`+ cityName + ` (` + day.date + `)</h5>
+                    <img src="https://openweathermap.org/img/wn/`+day.icon+`@2x.png" alt="weather icon">
                     <p class="card-text">Temperature: `+ day.temp + ` &#8451;</p>
                     <p class="card-text">Wind: `+ day.wind + ` KPH</p>
                     <p class="card-text">humidity: `+ day.humidity + ` %</p>
@@ -60,6 +61,7 @@ function fillDashboard(day, index, cityName) {
             <div class="card text-white bg-dark m-1 p-0 col-sm">
                 <div class="card-body">
                     <h5 class="card-title h3">`+ day.date + `</h5>
+                    <img src="https://openweathermap.org/img/wn/`+day.icon+`@2x.png" alt="weather icon">
                     <p class="card-text">Temperature: `+ day.temp + ` &#8451;</p>
                     <p class="card-text">Wind: `+ day.wind + ` KPH</p>
                     <p class="card-text">humidity: `+ day.humidity + ` %</p>
@@ -69,13 +71,13 @@ function fillDashboard(day, index, cityName) {
     }
 }
 
-//"init"
-catchHistory();
+//Init first time opening the application it will initialise with a search on London. The next time opening the application your last seach will be the initial
+callWeatherAPI(catchHistory());
 
 function catchHistory(city) {
     //get searchHistory from localstorage
     var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
-    //"init" when first open the application setting some placeholders for searchHistory
+    //Init when first open the application setting some placeholders for searchHistory
     if (!searchHistory) { 
         searchHistory = ["London", "Manchester", "Liverpool","Oxford","Brighton"];
     }
@@ -100,6 +102,7 @@ function catchHistory(city) {
             <button type="button" class="btn btn-secondary btn-block" data-city="`+searchHistory[i]+`">`+searchHistory[i]+`</button>
         `);   
     } 
+    return searchHistory[0];//Init
 }
 
 $(document).on("click", ".btn-secondary", function() {
