@@ -16,8 +16,9 @@ function callWeatherAPI(cityName) {
     }).then(function (response) {
         catchHistory(cityName);
         response.list.forEach(function (eachThreeHour, index) {
+            //index % 7 will manage to take each 21h forecast from the array to show for the user as each position in the array is 3h gap.
             if (index % 7 === 0) {
-
+                //create object "day" to pass to fillDashboard function
                 var day = {};
                 day.date = moment.unix(eachThreeHour.dt).format('DD-MM-YYYY');
                 day.icon = eachThreeHour.weather[0].icon;
@@ -33,6 +34,7 @@ function callWeatherAPI(cityName) {
 function fillDashboard(day, index, cityName) {
     var forecast = $("#forecast");
     if (index === 0) {
+        //clean then add header to forecast section
         forecast.empty();
         forecast.append(`
             <div class="col-sm-12">
@@ -40,6 +42,7 @@ function fillDashboard(day, index, cityName) {
             </div>
         `);
         var today = $("#today");
+        //clean then add todays section weather information
         today.empty();
         today.append(`
             <div class="card border-dark p-0">
@@ -52,6 +55,7 @@ function fillDashboard(day, index, cityName) {
             </div>
         `);
     } else {
+        //add next 5 days forecast
         forecast.append(`
             <div class="card text-white bg-dark m-1 p-0 col-sm">
                 <div class="card-body">
@@ -65,24 +69,30 @@ function fillDashboard(day, index, cityName) {
     }
 }
 
+//"init"
 catchHistory();
 
 function catchHistory(city) {
+    //get searchHistory from localstorage
     var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
-    if (!searchHistory) {
+    //"init" when first open the application setting some placeholders for searchHistory
+    if (!searchHistory) { 
         searchHistory = ["London", "Manchester", "Liverpool","Oxford","Brighton"];
     }
+    //if a city name was passed...
     if (city) {
+        //check if city is already in the searchHistory to remove it...
         if(searchHistory.includes(city)){
             searchHistory.splice(searchHistory.indexOf(city),1);
         }        
-        searchHistory.unshift(city);
-        console.log(searchHistory);
+        //add city as first in the searchHistory array and limit to 5 History items then localStore
+        searchHistory.unshift(city);        
         if (searchHistory.length > 5) {
             searchHistory.pop();
         }
         localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
     }
+    //create buttons for searchHistory items
     var history = $("#history");
     history.empty();
     for (var i = 0; i < searchHistory.length; i++) {         
