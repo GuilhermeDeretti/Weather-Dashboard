@@ -6,14 +6,27 @@ var units = '&units=metric'; //measurement units
 $("#search-button").on("click", function (event) {
     event.preventDefault();
     var searchInput = $("#search-input").val();
-    callWeatherAPI(searchInput);
+    var errMessage = $("#err-message");
+    if (searchInput.trim() === "") {
+        // city name is empty, show an error message        
+        errMessage.text("Please enter a city name");
+    } else if (!/^[a-zA-Z\s]+$/.test(searchInput)) {
+        // city name is not in the correct format, show an error message
+        errMessage.text("Please enter a valid city name (only letters and spaces allowed)");
+    } else {
+        // city name is not empty and is in the correct format, call the API
+        errMessage.text("");
+        callWeatherAPI(searchInput);
+        
+    }
 });
 
 function callWeatherAPI(cityName) {
     $.ajax({
         url: queryURL + city + cityName + units + API_KEY,
-        method: "GET"
-    }).then(function (response) {
+        method: "GET",
+    })
+    .then(function (response) {
         catchHistory(cityName);
         response.list.forEach(function (eachThreeHour, index) {
             //index % 7 will manage to take each 21h forecast from the array to show for the user as each position in the array is 3h gap.
@@ -28,6 +41,8 @@ function callWeatherAPI(cityName) {
                 fillDashboard(day, index, cityName);
             }
         });
+    }).catch(function(error) {
+        $("#err-message").text("City not Found!");        
     });
 }
 
@@ -48,7 +63,7 @@ function fillDashboard(day, index, cityName) {
             <div class="card border-dark p-0">
                 <div class="card-body text-dark">
                     <h5 class="card-title h3">`+ cityName + ` (` + day.date + `)</h5>
-                    <img src="https://openweathermap.org/img/wn/`+day.icon+`@2x.png" alt="weather icon">
+                    <img src="https://openweathermap.org/img/wn/`+ day.icon + `@2x.png" alt="weather icon">
                     <p class="card-text">Temperature: `+ day.temp + ` &#8451;</p>
                     <p class="card-text">Wind: `+ day.wind + ` KPH</p>
                     <p class="card-text">humidity: `+ day.humidity + ` %</p>
@@ -61,13 +76,13 @@ function fillDashboard(day, index, cityName) {
             <div class="card text-white bg-dark m-1 p-0 col-sm">
                 <div class="card-body">
                     <h5 class="card-title h3">`+ day.date + `</h5>
-                    <img src="https://openweathermap.org/img/wn/`+day.icon+`@2x.png" alt="weather icon">
+                    <img src="https://openweathermap.org/img/wn/`+ day.icon + `@2x.png" alt="weather icon">
                     <p class="card-text">Temperature: `+ day.temp + ` &#8451;</p>
                     <p class="card-text">Wind: `+ day.wind + ` KPH</p>
                     <p class="card-text">humidity: `+ day.humidity + ` %</p>
                 </div>
             </div>
-        `)
+        `);
     }
 }
 
@@ -78,17 +93,17 @@ function catchHistory(city) {
     //get searchHistory from localstorage
     var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
     //Init when first open the application setting some placeholders for searchHistory
-    if (!searchHistory) { 
-        searchHistory = ["London", "Manchester", "Liverpool","Oxford","Brighton"];
+    if (!searchHistory) {
+        searchHistory = ["London", "Manchester", "Liverpool", "Oxford", "Brighton"];
     }
     //if a city name was passed...
     if (city) {
         //check if city is already in the searchHistory to remove it...
-        if(searchHistory.includes(city)){
-            searchHistory.splice(searchHistory.indexOf(city),1);
-        }        
+        if (searchHistory.includes(city)) {
+            searchHistory.splice(searchHistory.indexOf(city), 1);
+        }
         //add city as first in the searchHistory array and limit to 5 History items then localStore
-        searchHistory.unshift(city);        
+        searchHistory.unshift(city);
         if (searchHistory.length > 5) {
             searchHistory.pop();
         }
@@ -97,14 +112,14 @@ function catchHistory(city) {
     //create buttons for searchHistory items
     var history = $("#history");
     history.empty();
-    for (var i = 0; i < searchHistory.length; i++) {         
+    for (var i = 0; i < searchHistory.length; i++) {
         history.append(`
-            <button type="button" class="btn btn-secondary btn-block" data-city="`+searchHistory[i]+`">`+searchHistory[i]+`</button>
-        `);   
-    } 
+            <button type="button" class="btn btn-secondary btn-block" data-city="`+ searchHistory[i] + `">` + searchHistory[i] + `</button>
+        `);
+    }
     return searchHistory[0];//Init
 }
 
-$(document).on("click", ".btn-secondary", function() {
+$(document).on("click", ".btn-secondary", function () {
     callWeatherAPI($(this).data("city"));
 });
