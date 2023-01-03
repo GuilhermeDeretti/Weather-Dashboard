@@ -1,7 +1,4 @@
-var queryURL = 'https://api.openweathermap.org/data/2.5/forecast?';
-var API_KEY = '&appid=5c0678461c6c91d2c88ed62ed1b01c32';
-var city = 'q=';
-var units = '&units=metric'; //measurement units
+var queryURL = 'https://api.openweathermap.org/data/2.5/forecast?appid=5c0678461c6c91d2c88ed62ed1b01c32&units=metric&q=';
 
 $("#search-button").on("click", function (event) {
     event.preventDefault();
@@ -23,14 +20,13 @@ $("#search-button").on("click", function (event) {
 
 function callWeatherAPI(cityName) {
     $.ajax({
-        url: queryURL + city + cityName + units + API_KEY,
+        url: queryURL + cityName,
         method: "GET",
-    })
-    .then(function (response) {
+    }).then(function (response) {
         catchHistory(cityName);
         response.list.forEach(function (eachThreeHour, index) {
-            //index % 7 will manage to take each 21h forecast from the array to show for the user as each position in the array is 3h gap.
-            if (index % 7 === 0) {
+            //index % 8 will manage to take each 24h forecast from the array to show for the user as each position in the array is 3h gap.
+            if (index % 8 === 0 || index === 39) {
                 //create object "day" to pass to fillDashboard function
                 var day = {};
                 day.date = moment.unix(eachThreeHour.dt).format('DD-MM-YYYY');
